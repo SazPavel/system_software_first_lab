@@ -56,8 +56,8 @@ int main()
     addr.sin_family = AF_INET;
     addr.sin_port = htons(0);
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    err_handler(bind(sock[0], (struct sockaddr*)&addr, sizeof(addr)), "bind", 0, 0);
-    err_handler(getsockname(sock[0], (struct sockaddr*)&parent, &size_p), "getsockname", 0, 0);
+    err_handler(bind(sock[0], (struct sockaddr*)&addr, sizeof(addr)), "bind", 1, sock);
+    err_handler(getsockname(sock[0], (struct sockaddr*)&parent, &size_p), "getsockname", 1, sock);
     printf("Port: %d\n", ntohs(parent.sin_port));
     listen(sock[0], 6);
     while(cycle)
@@ -67,9 +67,10 @@ int main()
         if(child_pid == 0)
         {
         	close(sock[0]);
-            int i;
+            int i, n;
             err_handler(send(sock[1], buf2, sizeof(buf2), 0), "send", 1, &sock[1]);
-        	for(i = 0; i < 100; i++)
+            bytes_read = err_handler(recv(sock[1], &n, sizeof(int), 0), "recv", 1, &sock[1]);
+        	for(i = 0; i < n; i++)
         	{
     	        bytes_read = err_handler(recv(sock[1], &buf, sizeof(int), 0), "recv", 1, &sock[1]);
                 printf("%d\n", buf);
